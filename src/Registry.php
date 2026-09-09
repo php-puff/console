@@ -17,7 +17,11 @@ final class Registry
 
     public function add(Contract $command): void
     {
-        $this->commands[$command->name()] = $command;
+        $name = $command->name();
+        if (isset($this->commands[$name])) {
+            throw new \InvalidArgumentException("Command [{$name}] is already registered.");
+        }
+        $this->commands[$name] = $command;
     }
 
     public function get(string $name): ?Contract

@@ -18,6 +18,14 @@ use Puff\Console\Output;
 
 final class ApplicationTest extends TestCase
 {
+    public function testRejectsDuplicateCommands(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Command [test] is already registered.');
+
+        new Console([new TestCommand(), new TestCommand()]);
+    }
+
     public function testRunsRegisteredCommand(): void
     {
         $stdout = \fopen('php://memory', 'w+');
