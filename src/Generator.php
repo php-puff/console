@@ -17,11 +17,13 @@ final readonly class Generator
     {
     }
 
+    /** @param array<string, string> $variables */
     public function generate(
         string $name,
         string $namespace,
         string $stub,
         bool $force = false,
+        array $variables = [],
     ): string {
         $class = $this->qualify($name, $namespace);
         $path = \rtrim($this->root, '/\\') . '/' . \lcfirst(\str_replace('\\', '/', $class)) . '.php';
@@ -41,7 +43,8 @@ final readonly class Generator
         $position = \strrpos($class, '\\');
         $classNamespace = $position === false ? '' : \substr($class, 0, $position);
         $className = $position === false ? $class : \substr($class, $position + 1);
-        $source = \str_replace(['%NAMESPACE%', '%CLASS%'], [$classNamespace, $className], $template);
+        $variables = ['%NAMESPACE%' => $classNamespace, '%CLASS%' => $className] + $variables;
+        $source = \str_replace(\array_keys($variables), \array_values($variables), $template);
         if (\file_put_contents($path, $source, LOCK_EX) === false) {
             throw new \RuntimeException("Unable to write file: {$path}");
         }

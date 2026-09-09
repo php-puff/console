@@ -13,11 +13,13 @@ namespace Puff\Console;
 
 final readonly class GenerateCommand implements Contract
 {
+    /** @param array<string, string> $variables */
     public function __construct(
         private string $name,
         private string $namespace,
         private string $stub,
         private Generator $generator,
+        private array $variables = [],
     ) {
     }
 
@@ -54,7 +56,13 @@ final readonly class GenerateCommand implements Contract
         }
 
         $namespace = (string) ($input->option('namespace') ?: $this->namespace);
-        $class = $this->generator->generate($name, $namespace, $this->stub, $input->hasOption('force'));
+        $class = $this->generator->generate(
+            $name,
+            $namespace,
+            $this->stub,
+            $input->hasOption('force'),
+            $this->variables,
+        );
         $output->write("{$class} created successfully.");
 
         return 0;
