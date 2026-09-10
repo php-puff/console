@@ -11,8 +11,10 @@ declare(strict_types=1);
 
 namespace Puff\Console;
 
+use Psr\Container\ContainerInterface;
+
 interface CommandProvider
 {
     /** @return iterable<Contract> */
-    public function commands(string $root): iterable;
+    public function commands(string $root, ContainerInterface $container): iterable;
 }

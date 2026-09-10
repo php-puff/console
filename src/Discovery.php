@@ -12,11 +12,12 @@ declare(strict_types=1);
 namespace Puff\Console;
 
 use Composer\InstalledVersions;
+use Psr\Container\ContainerInterface;
 
 final class Discovery
 {
     /** @return list<Contract> */
-    public static function commands(string $root): array
+    public static function commands(string $root, ContainerInterface $container): array
     {
         $commands = [];
         foreach (InstalledVersions::getInstalledPackages() as $package) {
@@ -41,7 +42,7 @@ final class Discovery
                         "Puff command provider [{$provider}] must implement " . CommandProvider::class . '.',
                     );
                 }
-                foreach ($instance->commands($root) as $command) {
+                foreach ($instance->commands($root, $container) as $command) {
                     $commands[] = $command;
                 }
             }
