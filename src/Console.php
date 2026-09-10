@@ -38,6 +38,7 @@ final class Console
     {
         $argv ??= \array_values((array) ($_SERVER['argv'] ?? []));
         $name = $argv[1] ?? null;
+        $command = null;
 
         try {
             if (\in_array($name, ['-V', '--version'], true)) {
@@ -58,6 +59,12 @@ final class Console
             }
             $input = Input::parse($tokens, $command->valueOptions(), $command->flagOptions());
             return $command->execute($input, $this->output);
+        } catch (\InvalidArgumentException $exception) {
+            if ($command instanceof Contract) {
+                return $this->help($command);
+            }
+            $this->output->error($exception->getMessage());
+            return 1;
         } catch (\Throwable $exception) {
             $this->output->error($exception->getMessage());
             return 1;

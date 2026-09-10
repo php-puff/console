@@ -88,9 +88,24 @@ final class ApplicationTest extends TestCase
         self::assertNotFalse($contents);
         self::assertStringContainsString('Usage: puff test <name>', $contents);
     }
+
+    public function testShowsHelpWhenACommandRequiresAnArgument(): void
+    {
+        $stdout = \fopen('php://memory', 'w+');
+        $stderr = \fopen('php://memory', 'w+');
+        self::assertIsResource($stdout);
+        self::assertIsResource($stderr);
+        $application = new Console([new RequiredCommand()], new Output($stdout, $stderr));
+
+        self::assertSame(0, $application->run(['puff', 'required']));
+        \rewind($stdout);
+        self::assertStringContainsString('Usage: puff required <value>', (string) \stream_get_contents($stdout));
+        \rewind($stderr);
+        self::assertSame('', \stream_get_contents($stderr));
+    }
 }
 
-final class TestCommand implements Contract
+class TestCommand implements Contract
 {
     public function name(): string
     {
@@ -121,5 +136,27 @@ final class TestCommand implements Contract
     {
         $output->write('Hello ' . $input->argument(0));
         return 0;
+    }
+}
+
+final class RequiredCommand extends TestCommand
+{
+    public function name(): string
+    {
+        return 'required';
+    }
+
+    public function usage(): string
+    {
+        return 'required <value>';
+    }
+
+    public function execute(Input $input, Output $output): int
+    {
+        if ($input->argument(0) === null) {
+            throw new \InvalidArgumentException('Value is required.');
+        }
+
+        return parent::execute($input, $output);
     }
 }
